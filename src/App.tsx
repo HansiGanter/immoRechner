@@ -1,14 +1,5 @@
 import React, { useState } from "react";
-import {
-  Layout,
-  Menu,
-  ConfigProvider,
-  Dropdown,
-  DatePicker,
-  theme,
-  Switch,
-  Flex,
-} from "antd";
+import { Layout, Menu, ConfigProvider, Dropdown, theme } from "antd";
 import type { ConfigProviderProps } from "antd";
 import { SunOutlined, MoonOutlined } from "@ant-design/icons";
 import { Button } from "antd";
@@ -18,6 +9,8 @@ import enUS from "antd/locale/en_US";
 import deDE from "antd/locale/de_DE";
 import esES from "antd/locale/es_ES";
 import dayjs from "dayjs";
+import { NavLink, Route, Routes, useLocation } from "react-router-dom";
+import Transactions from "./pages/Transactions/Transactions";
 
 type Locale = ConfigProviderProps["locale"];
 
@@ -28,15 +21,15 @@ const { Header, Content } = Layout;
 const navbarItems = [
   {
     key: 1,
-    label: `Transactions`,
+    label: <NavLink to="/transactions">Transactions</NavLink>,
   },
   {
     key: 2,
-    label: `Dashboard`,
+    label: <NavLink to="/dashboard">Dashboard</NavLink>,
   },
   {
     key: 3,
-    label: `Playground`,
+    label: <NavLink to="/playground">Playground</NavLink>,
   },
 ];
 
@@ -77,10 +70,21 @@ const App: React.FC = () => {
     ),
   }));
 
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(false); // New state for dark mode
+  const [isDarkMode, setIsDarkMode] = useState<boolean>(false);
 
   const toggleTheme = () => {
-    setIsDarkMode(!isDarkMode); // Toggle dark mode state
+    setIsDarkMode(!isDarkMode);
+  };
+
+  const location = useLocation();
+
+  const [selectedMenuKey, setSelectedMenuKey] = useState<string>("1");
+
+  const handleHomeButtonClick = () => {
+    setSelectedMenuKey("1");
+  };
+  const handleMenuClick = (e: { key: string }) => {
+    setSelectedMenuKey(e.key);
   };
 
   return (
@@ -101,18 +105,25 @@ const App: React.FC = () => {
               : "1px solid rgba(5, 5, 5, 0.06)",
           }}
         >
-          <img
-            src={logo}
-            className="App-logo"
-            style={{ padding: 8 }}
-            alt="logo"
-          />
+          <NavLink
+            to="/"
+            style={{ display: "flex", height: "100%" }}
+            onClick={handleHomeButtonClick}
+          >
+            <img
+              src={logo}
+              alt="logo"
+              className="App-logo"
+              style={{ padding: 8 }}
+            />
+          </NavLink>
           <Menu
             theme="light"
             mode="horizontal"
-            defaultSelectedKeys={["2"]}
+            selectedKeys={[selectedMenuKey]}
             items={navbarItems}
             style={{ flex: 1, minWidth: 0 }}
+            onClick={handleMenuClick}
           />
           <div style={{ display: "flex", gap: 16 }}>
             <Dropdown menu={{ items: languageItems }} placement="bottomRight">
@@ -135,9 +146,15 @@ const App: React.FC = () => {
             </Button>
           </div>
         </Header>
+
         <Content style={{ padding: "48px 48px" }}>
-          Content
-          <DatePicker />
+          <Routes>
+            <Route path="/" element={<Transactions />} />
+            <Route path="/transactions" element={<Transactions />} />
+            <Route path="/dashboard" element={<div>dashboard</div>} />
+            <Route path="*" element={<div>404</div>} />
+          </Routes>
+          <p>URL: {location.pathname}</p>
         </Content>
       </Layout>
     </ConfigProvider>
